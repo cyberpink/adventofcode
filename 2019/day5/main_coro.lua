@@ -18,14 +18,14 @@ local function run_thread(t, input)
    local _, v = coroutine.resume(t)
    while (true) do
       if v.status == 0 then
-	 _, v = coroutine.resume(t, input)
+         _, v = coroutine.resume(t, input)
       elseif v.status == 1 then
-	 print(v.value)
-	 _, v = coroutine.resume(t)
+         print(v.value)
+         _, v = coroutine.resume(t)
       elseif v.status == 2 then
-	 break
+         break
       else
-	 assert(false)
+         assert(false)
       end      
    end
 end
@@ -50,48 +50,48 @@ local function run(mem)
       modes[3] = math.floor(_op / 10000) % 10
 
       if opcode == 1 then
-	 mem[op[3]] = get(op[1], modes[1], mem) + get(op[2], modes[2], mem)
-	 op = op + 4
+         mem[op[3]] = get(op[1], modes[1], mem) + get(op[2], modes[2], mem)
+         op = op + 4
       elseif opcode == 2 then
-	 mem[op[3]] = get(op[1], modes[1], mem) * get(op[2], modes[2], mem)
-	 op = op + 4
+         mem[op[3]] = get(op[1], modes[1], mem) * get(op[2], modes[2], mem)
+         op = op + 4
       elseif opcode == 3 then
-	 mem[op[1]] = get_msg()
-	 op = op + 2
+         mem[op[1]] = get_msg()
+         op = op + 2
       elseif opcode == 4 then
-	 put_msg(get(op[1], modes[1], mem))
-	 op = op + 2
+         put_msg(get(op[1], modes[1], mem))
+         op = op + 2
       elseif opcode == 5 then
-	 if get(op[1], modes[1], mem) ~= 0 then
-	    op = mem + get(op[2], modes[2], mem)
-	 else
-	    op = op + 3
-	 end
+         if get(op[1], modes[1], mem) ~= 0 then
+            op = mem + get(op[2], modes[2], mem)
+         else
+            op = op + 3
+         end
       elseif opcode == 6 then
-	 if get(op[1], modes[1], mem) == 0 then
-	    op = mem + get(op[2], modes[2], mem)
-	 else
-	    op = op + 3
-	 end
+         if get(op[1], modes[1], mem) == 0 then
+            op = mem + get(op[2], modes[2], mem)
+         else
+            op = op + 3
+         end
       elseif opcode == 7 then
-	 if get(op[1], modes[1], mem) < get(op[2], modes[2], mem) then
-	    mem[op[3]] = 1
-	 else
-	    mem[op[3]] = 0
-	 end
-	 op = op + 4
+         if get(op[1], modes[1], mem) < get(op[2], modes[2], mem) then
+            mem[op[3]] = 1
+         else
+            mem[op[3]] = 0
+         end
+         op = op + 4
       elseif opcode == 8 then
-	 if get(op[1], modes[1], mem) == get(op[2], modes[2], mem) then
-	    mem[op[3]] = 1
-	 else
-	    mem[op[3]] = 0
-	 end
-	 op = op + 4
+         if get(op[1], modes[1], mem) == get(op[2], modes[2], mem) then
+            mem[op[3]] = 1
+         else
+            mem[op[3]] = 0
+         end
+         op = op + 4
       elseif opcode == 99 then
-	 thread_done()
+         thread_done()
       else
-	 print(op[0], opcode)
-	 assert(false)
+         print(op[0], opcode)
+         assert(false)
       end
    end
 end
