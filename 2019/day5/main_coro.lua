@@ -15,13 +15,13 @@ local function thread_done()
 end
 
 local function run_thread(t, input)
-   local status, v = coroutine.resume(t)
+   local _, v = coroutine.resume(t)
    while (true) do
       if v.status == 0 then
-	 status, v = coroutine.resume(t, input)
+	 _, v = coroutine.resume(t, input)
       elseif v.status == 1 then
 	 print(v.value)
-	 status, v = coroutine.resume(t)
+	 _, v = coroutine.resume(t)
       elseif v.status == 2 then
 	 break
       else
