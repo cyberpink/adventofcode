@@ -1,15 +1,34 @@
-let rec build_graph tbl =
+let rec build_graph tbl rev =
   try
-    Scanf.scanf "%3s)%3s\n" (fun a b -> Hashtbl.add tbl b a; build_graph tbl)
+    Scanf.scanf "%3s)%3s\n" (fun a b -> Hashtbl.add tbl b a; Hashtbl.add rev a b; build_graph tbl rev)
   with
   | End_of_file -> ()
 
-let rec indirect vs tbl cnt =
-  List.iter
-    (fun v ->
-       cnt := succ !cnt;          
-       indirect (Hashtbl.find_all tbl v) tbl cnt)
-    vs
+(* let indirect tbl =
+ *   let cnt = ref 0 in
+ *   let rec aux vs =
+ *     List.iter
+ *       (fun v ->
+ *          cnt := succ !cnt;          
+ *          aux (Hashtbl.find_all tbl v))
+ *       vs
+ *   in
+ *   Hashtbl.iter (fun k _ -> aux (Hashtbl.find_all tbl k)) tbl;
+ *   !cnt *)
+
+(* memoized *)
+let indirect tbl =
+  let memo = Hashtbl.create 100 in
+  let rec get_count x =
+    match Hashtbl.find memo x with
+    | value -> value
+    | exception Not_found ->
+      let children = Hashtbl.find_all tbl x in
+      let ccount = List.fold_left (+) 0 (List.map (fun c -> 1 + get_count c) children) in
+      let value = ccount in
+      Hashtbl.add memo x value;
+      value
+  in Hashtbl.fold (fun k _ m -> m + get_count k) tbl 0
 
 let rec path v p tbl =
   try
@@ -27,11 +46,10 @@ let rec drop_common a b =
 
 let () =
   let table = Hashtbl.create 100 in
-  let count = ref 0 in
-  build_graph table;
-  Hashtbl.iter (fun k _ -> indirect (Hashtbl.find_all table k) table count) table;
+  let rev = Hashtbl.create 100 in
+  build_graph table rev;
   let you_path = path "YOU" [] table in
   let san_path = path "SAN" [] table in
   let (p1, p2) = drop_common you_path san_path in
   let steps = (List.length p1 + List.length p2) - 2 in
-  Printf.printf "%d\n%d\n" !count steps
+  Printf.printf "%d\n%d\n" (indirect table) steps
