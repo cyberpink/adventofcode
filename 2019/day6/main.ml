@@ -1,22 +1,9 @@
-let rec build_graph tbl rev =
+let rec build_graph tbl =
   try
-    Scanf.scanf "%3s)%3s\n" (fun a b -> Hashtbl.add tbl b a; Hashtbl.add rev a b; build_graph tbl rev)
+    Scanf.scanf "%3s)%3s\n" (fun a b -> Hashtbl.add tbl b a; build_graph tbl)
   with
   | End_of_file -> ()
 
-(* let indirect tbl =
- *   let cnt = ref 0 in
- *   let rec aux vs =
- *     List.iter
- *       (fun v ->
- *          cnt := succ !cnt;          
- *          aux (Hashtbl.find_all tbl v))
- *       vs
- *   in
- *   Hashtbl.iter (fun k _ -> aux (Hashtbl.find_all tbl k)) tbl;
- *   !cnt *)
-
-(* memoized *)
 let indirect tbl =
   let memo = Hashtbl.create 100 in
   let rec get_count x =
@@ -24,8 +11,7 @@ let indirect tbl =
     | value -> value
     | exception Not_found ->
       let children = Hashtbl.find_all tbl x in
-      let ccount = List.fold_left (+) 0 (List.map (fun c -> 1 + get_count c) children) in
-      let value = ccount in
+      let value = List.fold_left (+) 0 (List.map (fun c -> 1 + get_count c) children) in
       Hashtbl.add memo x value;
       value
   in Hashtbl.fold (fun k _ m -> m + get_count k) tbl 0
@@ -46,8 +32,7 @@ let rec drop_common a b =
 
 let () =
   let table = Hashtbl.create 100 in
-  let rev = Hashtbl.create 100 in
-  build_graph table rev;
+  build_graph table;
   let you_path = path "YOU" [] table in
   let san_path = path "SAN" [] table in
   let (p1, p2) = drop_common you_path san_path in
