@@ -188,9 +188,9 @@ local function make_program()
    return amps
 end
 
-function part1()
+local function run_permutations(inputs)
    local ps = {}
-   permutations({0,1,2,3,4}, 1, ps)
+   permutations(inputs, 1, ps)
    local max = 0
    for i=1,#ps,1 do
       local out = run_threads(make_program(), ps[i])
@@ -198,21 +198,8 @@ function part1()
          max = out
       end
    end
-   print(max)
+   return max
 end
 
-function part2()
-   local ps = {}
-   permutations({5,6,7,8,9}, 1, ps)
-   local max = 0
-   for i=1,#ps,1 do
-      local out = run_threads(make_program(), ps[i])
-      if out > max then
-         max = out
-      end
-   end
-   print(max)
-end
-
-part1()
-part2()
+print(run_permutations({0,1,2,3,4}))
+print(run_permutations({5,6,7,8,9}))
