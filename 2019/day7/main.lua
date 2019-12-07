@@ -122,7 +122,7 @@ local function recv(cs, id)
    return msg
 end
 
-local function run_threads(t, inits, loop)
+local function run_threads(t, inits)
    local pid = 1
    local channel = {}
    for i=1,#t,1 do
@@ -131,13 +131,6 @@ local function run_threads(t, inits, loop)
    end
    send(channel, 1, 0)
    ::next_thread::
-   if(pid > #t) then
-      if loop then
-         pid = 1
-      else
-         return recv(channel, 1)
-      end
-   end
    local _, v = coroutine.resume(t[pid])
    ::continue::
    if v.status == 0 then
@@ -146,7 +139,7 @@ local function run_threads(t, inits, loop)
       goto continue
    elseif v.status == 1 then
       send(channel, (pid%5)+1, v.value)
-      pid = pid + 1
+      pid = (pid%5) + 1
       goto next_thread
    elseif v.status == 2 then
       if pid == 5 then
@@ -200,7 +193,7 @@ function part1()
    permutations({0,1,2,3,4}, 1, ps)
    local max = 0
    for i=1,#ps,1 do
-      local out = run_threads(make_program(), ps[i], false)
+      local out = run_threads(make_program(), ps[i])
       if out > max then
          max = out
       end
@@ -208,13 +201,12 @@ function part1()
    print(max)
 end
 
-
-function part2 ()
+function part2()
    local ps = {}
    permutations({5,6,7,8,9}, 1, ps)
    local max = 0
    for i=1,#ps,1 do
-      local out = run_threads(make_program(), ps[i], true)
+      local out = run_threads(make_program(), ps[i])
       if out > max then
          max = out
       end
