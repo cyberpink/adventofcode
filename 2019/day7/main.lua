@@ -111,11 +111,7 @@ end
 
 local function recv(cs, id)
    local s = cs[id].s
-   local e = cs[id].e
-   if s > e then
-      print("reading from empty channel")
-      assert(false)
-   end
+   assert(s <= cs[id].e, "reading from empty channel")
    local msg = cs[id].q[s]
    cs[id].q[s] = nil
    cs[id].s = s + 1
@@ -124,26 +120,25 @@ end
 
 local function run_threads(t, inits)
    local pid = 1
-   local channel = {}
+   local channels = {}
    for i=1,#t,1 do
-      channel[i] = { s = 1, e = 0, q = {}}
-      send(channel, i, inits[i])
+      channels[i] = { s = 1, e = 0, q = {}}
+      send(channels, i, inits[i])
    end
-   send(channel, 1, 0)
+   send(channels, 1, 0)
    ::next_thread::
    local _, v = coroutine.resume(t[pid])
    ::continue::
    if v.status == 0 then
-      local val = recv(channel, pid)
-      _, v = coroutine.resume(t[pid], val)
+      _, v = coroutine.resume(t[pid], recv(channels, pid))
       goto continue
    elseif v.status == 1 then
-      send(channel, (pid%5)+1, v.value)
+      send(channels, (pid%5)+1, v.value)
       pid = (pid%5) + 1
       goto next_thread
    elseif v.status == 2 then
       if pid == 5 then
-         return recv(channel, 1)
+         return recv(channels, 1)
       else
          pid = pid + 1
          goto next_thread
@@ -154,12 +149,6 @@ local function run_threads(t, inits)
    end
 end
 
-local function swap(xs, a, b)
-   local tmp = xs[a]
-   xs[a] = xs[b]
-   xs[b] = tmp
-end
-
 local function copy(xs)
    local out = {}
    for i=1, #xs, 1 do
@@ -168,14 +157,14 @@ local function copy(xs)
    return out
 end
 
-function permutations(xs, ptr, out)
+local function permutations(xs, ptr, out)
    if ptr == #xs then
       table.insert(out, copy(xs))
    else
       for i = ptr,#xs,1 do
-         swap(xs, ptr, i)
+         xs[ptr], xs[i] = xs[i], xs[ptr]
          permutations(xs, ptr+1, out)
-         swap(xs, i, ptr)
+         xs[ptr], xs[i] = xs[i], xs[ptr]
       end
    end
 end
