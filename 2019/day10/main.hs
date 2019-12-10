@@ -10,9 +10,7 @@ atan2' (P x y) = atan2 (- (fromIntegral x)) (fromIntegral y)
 clock (P ox oy) (P hx hy) = P (quot x d) (quot y d)
   where
     (x, y) = (hx - ox, hy - oy) 
-    d = case gcd x y of
-          0 -> 1
-          d -> d
+    d = gcd x y
 instance (Eq Point) where
   a == b = atan2' a == atan2' b
   a /= b = atan2' a /= atan2' b
