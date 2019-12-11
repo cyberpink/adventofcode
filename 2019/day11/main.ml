@@ -47,37 +47,37 @@ let run_program p h =
   let rec give_color h c d = function
     | Get k ->
       let color = match Grid.find_opt c h with Some x -> x | None -> 0 in
-      get_color h c d @@ k color
+      get_and_paint_color h c d @@ k color
     | _ -> failwith "bad state1"
-  and get_color h c d = function
+  and get_and_paint_color h c d = function
     | Put (x, k) ->
       if not (Grid.mem c h) then count := succ !count;
-      let (l,r,b, t) = !dim in
+      let (l,r,b,t) = !dim in
       let (cx, cy) = c in
       dim := (min cx l, max cx r, min cy b, max cy t);
-      get_dir (Grid.add c x h) c d @@ k ()
+      get_dir_and_move (Grid.add c x h) c d @@ k ()
     | _ -> failwith "bad state2"
-  and get_dir h c d = function
+  and get_dir_and_move h c d = function
     | Put (x, k) ->
       let d' = turn d x in
-      next h (move c d') d' @@ k ()
+      done_or_next h (move c d') d' @@ k ()
     | _ -> failwith "bad state3"
-  and next h c d = function 
+  and done_or_next h c d = function 
     | Done -> (!count, h, !dim)
     | r -> give_color h c d r
   in give_color h (0,0) (1,0) (run p)
 
 let rec init =
   let p = List.map int_of_string @@ String.split_on_char ',' @@ read_line () in
-  let mem = Array.make 1500 0 in
+  let mem = Array.make 1200 0 in
   List.iteri (Array.set mem) p;
   let (p1, _, _) = run_program (Array.copy mem) Grid.empty in
-  let (p2c, p2, (l,r,b,t)) = run_program (Array.copy mem) (Grid.singleton (0,0) 1) in
   Printf.printf "count: %d\n" p1;
-  for y = b to t do
-    for x = r downto l do
+  let (_, p2, (l,r,b,t)) = run_program (Array.copy mem) (Grid.singleton (0,0) 1) in
+  for y = t downto b do
+    for x = l to r do
       let d = match Grid.find_opt (x, y) p2 with Some x -> x | _ -> 0 in
-      print_string @@ if d =1 then "X" else " "
+      print_string @@ if d = 1 then "██" else "░░"
     done;
     print_newline ()
   done;
