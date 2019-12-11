@@ -65,9 +65,9 @@ let run_program p h =
   and done_or_next h c d = function 
     | Done -> (!count, h, !dim)
     | r -> give_color h c d r
-  in give_color h (0,0) (1,0) (run p)
+  in give_color h (0,0) (0,1) (run p)
 
-let rec init =
+let main =
   let p = List.map int_of_string @@ String.split_on_char ',' @@ read_line () in
   let mem = Array.make 1200 0 in
   List.iteri (Array.set mem) p;
