@@ -1,61 +1,48 @@
 let vec3 a b c = [| a; b; c |]
 let grav a b = Array.map2 compare b a
 let add a b = Array.map2 (+) a b
-let sum a = Array.fold_left (+) 0 a
-let engy a = sum @@ Array.map abs a
+let engy a = Array.fold_left (+) 0 @@ Array.map abs a
 
-let rec gcd a b =
-  if b = 0
-  then a
-  else gcd b (a mod b)
-
+let rec gcd a b = if b = 0 then a else gcd b (a mod b)
 let lcm a b = (abs (a * b)) / (gcd a b)
 
-type planet = { p : int array; v : int array }
-let mk_planet p = { p = p; v = vec3 0 0 0 }
+let step (ps, vs) =
+  let calc_vs p v = List.fold_left add v @@ List.map (grav p) ps in
+  let vs' = List.map2 calc_vs ps vs in
+  (List.map2 add ps vs', vs')
 
-let read_planet () = Scanf.scanf "<x=%d, y=%d, z=%d>\n" vec3
-let print_planet p =
-  Printf.printf "pos=<x=%d, y=%d, z=%d>, vel=<x=%d, y=%d, z=%d>\n"
-    p.p.(0) p.p.(1) p.p.(2) p.v.(0) p.v.(1) p.v.(2)
-
-let step planets =
-  let calc p =
-    let ds = List.map (fun p2 -> grav p.p p2.p) planets in
-    let v' = List.fold_left add p.v ds in
-    { p = add p.p v'; v = v' }
-  in List.map calc planets
-
-let p1 planets =
-  let planets = ref planets in
-  for i = 0 to 999 do
-    planets := step !planets
+let p1 (_ps, _vs) =
+  let pvs = ref (_ps, _vs) in
+  for i = 1 to 1000 do
+    pvs := step !pvs
   done;
-  List.fold_left (+) 0 @@ List.map (fun p -> engy p.p * engy p.v) !planets
+  let (ps, vs) = !pvs in
+  List.fold_left (+) 0 @@ List.map2 (fun p v -> engy p * engy v) ps vs
 
-let p2 planets = 
-  let rec loop d ps i =
-    let ps' = step ps in
+let p2 (_ps, _vs) =
+  let rec loop pvs i ds m =
+    let (ps', vs') = step pvs in
     let i' = succ i in
-    if List.for_all2 (fun a b -> a.v.(d) = b.v.(d) && a.p.(d) = b.p.(d)) ps' planets then
-      i'
-    else
-      loop d ps' i'
-  in
-  let m = ref 1 in
-  for d = 0 to 2 do
-    m := lcm !m (loop d planets 0)
-  done;
-  !m
+    let fold_dim (dm, mm) d =
+      let ps_eq = List.for_all2 (fun a b -> a.(d) = b.(d)) ps' _ps in
+      let vs_eq = List.for_all2 (fun a b -> a.(d) = b.(d)) vs' _vs in 
+      if ps_eq && vs_eq then
+        (dm, lcm i' mm)
+      else
+        (d :: dm, mm)
+    in
+    match List.fold_left fold_dim ([], m) ds with
+    | ([], m') -> m'
+    | (ds', m') -> loop (ps', vs') i' ds' m'
+  in loop (_ps, _vs) 0 [0;1;2] 1
+
+let read_pos () = Scanf.scanf "<x=%d, y=%d, z=%d>\n" vec3
+let rec setup ps vs =
+  match read_pos () with
+  | p -> setup (p :: ps) (vec3 0 0 0 :: vs)
+  | exception End_of_file -> (List.rev ps, List.rev vs)
 
 let main =
-  let planets = ref [] in
-  try
-    while true do
-      planets := mk_planet (read_planet ()) :: !planets;
-    done
-  with
-    End_of_file ->
-    let planets = List.rev !planets in
-    Printf.printf "%d\n" @@ p1 planets;
-    Printf.printf "%d\n" @@ p2 planets
+  let (ps, vs) = setup [] [] in
+  Printf.printf "%d\n" @@ p1 (ps, vs);
+  Printf.printf "%d\n" @@ p2 (ps, vs)
