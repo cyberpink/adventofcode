@@ -1,17 +1,17 @@
 let vec3 a b c = [| a; b; c |]
-let map2 f a b =
-  let out = Array.make 3 0 in
-  for i = 0 to 2 do
-    out.(i) <- f a.(i) b.(i)
-  done;
-  out
-
-let grav a b = map2 compare b a
-let add a b = map2 (+) a b
+let grav a b = Array.map2 compare b a
+let add a b = Array.map2 (+) a b
 let sum a = Array.fold_left (+) 0 a
 let engy a = sum @@ Array.map abs a
 
-type planet = {  p : int array; v : int array }
+let rec gcd a b =
+  if b = 0
+  then a
+  else gcd b (a mod b)
+
+let lcm a b = (abs (a * b)) / (gcd a b)
+
+type planet = { p : int array; v : int array }
 let mk_planet p = { p = p; v = vec3 0 0 0 }
 
 let read_planet () = Scanf.scanf "<x=%d, y=%d, z=%d>\n" vec3
@@ -21,7 +21,7 @@ let print_planet p =
 
 let step planets =
   let calc p =
-    let ds = List.map (fun p2 -> (grav p.p p2.p)) planets in
+    let ds = List.map (fun p2 -> grav p.p p2.p) planets in
     let v' = List.fold_left add p.v ds in
     { p = add p.p v'; v = v' }
   in List.map calc planets
@@ -33,6 +33,22 @@ let p1 planets =
   done;
   List.fold_left (+) 0 @@ List.map (fun p -> engy p.p * engy p.v) !planets
 
+let p2 planets' = 
+  let planets = ref planets' in
+  let loopc = ref 0 in
+  let loops = ref [] in
+  let i = ref 0 in
+  while !loopc < 3 do
+    planets := step !planets;
+    i := succ !i;
+    for d = 0 to 2 do
+      let ds = List.map2 (fun a b -> a.v.(d) = b.v.(d) && a.p.(d) = b.p.(d)) planets' !planets in
+      if List.for_all (fun x -> x) ds then
+        (loopc := succ !loopc; loops := !i :: !loops)
+    done
+  done;
+  List.fold_left lcm 1 !loops
+
 let main =
   let planets = ref [] in
   try
@@ -43,3 +59,4 @@ let main =
     End_of_file ->
     let planets = List.rev !planets in
     Printf.printf "%d\n" @@ p1 planets;
+    Printf.printf "%d\n" @@ p2 planets
