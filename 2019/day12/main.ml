@@ -36,18 +36,18 @@ let p1 planets =
 let p2 planets' = 
   let planets = ref planets' in
   let loopc = ref 0 in
-  let loops = ref [] in
+  let out = ref 1 in
   let i = ref 0 in
   while !loopc < 3 do
     planets := step !planets;
     i := succ !i;
     for d = 0 to 2 do
-      let ds = List.map2 (fun a b -> a.v.(d) = b.v.(d) && a.p.(d) = b.p.(d)) planets' !planets in
-      if List.for_all (fun x -> x) ds then
-        (loopc := succ !loopc; loops := !i :: !loops)
+      let ds = List.for_all2 (fun a b -> a.v.(d) = b.v.(d) && a.p.(d) = b.p.(d)) planets' !planets in
+      if ds then
+        (loopc := succ !loopc; out := lcm !i !out)
     done
   done;
-  List.fold_left lcm 1 !loops
+  !out
 
 let main =
   let planets = ref [] in
