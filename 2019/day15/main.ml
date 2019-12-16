@@ -1,4 +1,3 @@
-(* ocamlfind ocamlc -linkpkg -package delimcc main.ml *)
 type req =
   | Get of (int -> req)
   | Put of int * (unit -> req)
@@ -36,10 +35,6 @@ let run mem =
     | _ -> failwith "bad op"
   in go mem 0 0
 
-let p = Delimcc.new_prompt ()
-let reset t = Delimcc.push_prompt p t
-let amb xs = Delimcc.shift0 p (fun k -> List.iter k xs)
-
 module Grid = Set.Make(struct type t = (int * int) let compare = compare end)
 let dirs = [1;2;3;4]
 let get_dir i = [|(0, 1); (0, -1); (-1, 0); (1, 0)|].(i-1)
@@ -52,11 +47,16 @@ let p1 m =
   let rec handle p d n g = function
     | Get k -> let p' = move p d in if not (Grid.mem p' g) then handle p' d n g (k d)
     | Put (0, k) -> ()
-    | Put (1, k) -> map := Grid.add p !map; handle p (amb dirs) (n + 1) (Grid.add p g) (k ())
+    | Put (1, k) -> map := Grid.add p !map;
+      for d = 1 to 4 do
+        handle p d (n + 1) (Grid.add p g) (k ())
+      done
     | Put (2, k) -> best := min !best n; oxy := p
     | _ ->  failwith "bad state"
   in
-  let _ = reset (fun () -> handle (1,1) (amb dirs) 1 Grid.empty (run m)) in
+  for d = 1 to 4 do
+    handle (1,1) d 1 Grid.empty (run m)
+  done;
   (!best, !oxy, !map)
 
 let adjacents p = Grid.of_list @@ List.map (move p) dirs
