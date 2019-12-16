@@ -44,19 +44,21 @@ let p1 m =
   let best = ref 9999 in
   let oxy = ref (0,0) in
   let map = ref Grid.empty in
-  let rec handle p d n g = function
-    | Get k -> let p' = move p d in if not (Grid.mem p' g) then handle p' d n g (k d)
+  let rec handle_try p n g = function
+    | Get k ->
+      for d = 1 to 4 do
+        let p' = move p d in
+        if not (Grid.mem p' g)
+        then handle_check p' d n g (k d)
+      done
+    | _ -> failwith "bad state1"
+  and  handle_check p d n g = function
     | Put (0, k) -> ()
     | Put (1, k) -> map := Grid.add p !map;
-      for d = 1 to 4 do
-        handle p d (n + 1) (Grid.add p g) (k ())
-      done
+      handle_try p (n + 1) (Grid.add p g) (k ())
     | Put (2, k) -> best := min !best n; oxy := p
-    | _ ->  failwith "bad state"
-  in
-  for d = 1 to 4 do
-    handle (1,1) d 1 Grid.empty (run m)
-  done;
+    | _ ->  failwith "bad state2"
+  in handle_try (1,1) 1 Grid.empty (run m);
   (!best, !oxy, !map)
 
 let adjacents p = Grid.of_list @@ List.map (move p) dirs
