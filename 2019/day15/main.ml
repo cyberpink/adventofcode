@@ -43,28 +43,20 @@ let amb xs = Delimcc.shift0 p (fun k -> List.iter k xs)
 module Grid = Set.Make(struct type t = (int * int) let compare = compare end)
 let dirs = [1;2;3;4]
 let get_dir i = [|(0, 1); (0, -1); (-1, 0); (1, 0)|].(i-1)
-let move (cx, cy) d =
-  let (dx, dy) = get_dir d in
-  (cx + dx, cy + dy)
+let move (cx, cy) d = let (dx, dy) = get_dir d in (cx + dx, cy + dy)
 
 let p1 m =
   let best = ref 9999 in
   let oxy = ref (0,0) in
   let map = ref Grid.empty in
-  let record p = map := Grid.add p !map in
-  let rec handle_try p d n g = function
-    | Get k -> let p' = move p d in
-      if not (Grid.mem p' g) then handle_check p' d n g (k d)
-    | _ -> failwith "bad state"
-  and handle_check p d n g r =
-    match r with
+  let rec handle p d n g = function
+    | Get k -> let p' = move p d in if not (Grid.mem p' g) then handle p' d n g (k d)
     | Put (0, k) -> ()
-    | Put (1, k) -> record p;
-      handle_try p (amb dirs) (n + 1) (Grid.add p g) (k ())
+    | Put (1, k) -> map := Grid.add p !map; handle p (amb dirs) (n + 1) (Grid.add p g) (k ())
     | Put (2, k) -> best := min !best n; oxy := p
-    | _ ->  failwith "bad state 2"
+    | _ ->  failwith "bad state"
   in
-  let _ = reset (fun () -> handle_try (1,1) (amb dirs) 1 Grid.empty (run m)) in
+  let _ = reset (fun () -> handle (1,1) (amb dirs) 1 Grid.empty (run m)) in
   (!best, !oxy, !map)
 
 let adjacents p = Grid.of_list @@ List.map (move p) dirs
