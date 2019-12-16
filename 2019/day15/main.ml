@@ -53,18 +53,13 @@ let p1 m =
   let map = ref Grid.empty in
   let record p = map := Grid.add p !map in
   let rec handle_try p d n g = function
-    | Get k ->
-      let p' = move p d in
-      if Grid.mem p' g then
-        ()
-      else
-        handle_check p' d n g (k d)
+    | Get k -> let p' = move p d in
+      if not (Grid.mem p' g) then handle_check p' d n g (k d)
     | _ -> failwith "bad state"
   and handle_check p d n g r =
     match r with
     | Put (0, k) -> ()
-    | Put (1, k) ->
-      record p;
+    | Put (1, k) -> record p;
       handle_try p (amb dirs) (n + 1) (Grid.add p g) (k ())
     | Put (2, k) -> best := min !best n; oxy := p
     | _ ->  failwith "bad state 2"
@@ -73,25 +68,18 @@ let p1 m =
   (!best, !oxy, !map)
 
 let adjacents p = Grid.of_list @@ List.map (move p) dirs
-let p2 o g =
-  let rec loop o h i =
-    if Grid.cardinal h = 0 then
-      i
-    else
-      let o' =
-        Grid.inter h @@ 
-        List.fold_left Grid.union Grid.empty @@
-        List.map adjacents (Grid.elements o) in
-      let h' = Grid.diff h o' in
-      loop o' h' (i + 1)
-  in loop (Grid.singleton o) g 0
-
+let rec p2 o h i =
+  if Grid.cardinal h = 0 then
+    i
+  else
+    let adj = Grid.fold (fun x m -> Grid.union m (adjacents x)) o Grid.empty in
+    let o' = (Grid.inter h adj) in
+    p2 o' (Grid.diff h o') (i + 1)
 
 let main =
   let p = List.map int_of_string @@ String.split_on_char ',' @@ read_line () in
   let mem = ref IntMap.empty in
   List.iteri (fun i x -> mem := IntMap.add i x !mem) p;
-  let (p1a, o, g) = p1 !mem  in
+  let (p1a, o, h) = p1 !mem  in
   Printf.printf "%d\n" p1a;
-  let p2a = p2 o g in
-  Printf.printf "%d\n" p2a
+  Printf.printf "%d\n" @@ p2 (Grid.singleton o) h 0
