@@ -60,18 +60,17 @@ let p1 m =
 
 let p2 m =
   let rec loop x y =
-    let tl = go m x y in
-    let tr = go m (x+99) y in
-    let bl = if y < 100 then 0 else go m x (y-99) in
-    let br = if y < 100 then 0 else  go m (x+99) (y-99) in
+    let bl = go m x y in
+    let br = go m (x+99) y in
+    let tl = go m x (y-99) in
+    let tr = go m (x+99) (y-99) in
     match (tl, tr, bl, br) with
     | (1,1,1,1) -> (x*10000+(y-99))
     | _ ->
-      (match (go m (x + 1) y, go m x (y + 1)) with
-       | (_,1) -> loop x (y+1)
-       | (1,0) -> loop (x+1) y
-       | _ -> failwith "bad")
-  in loop 31 48
+      if go m x (y + 1) = 1
+      then loop x (y+1)
+      else loop (x+1) y
+  in loop 0 100
 
 let main =
   let p = List.map int_of_string @@ String.split_on_char ',' @@ read_line () in
