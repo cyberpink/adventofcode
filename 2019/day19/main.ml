@@ -60,16 +60,12 @@ let p1 m =
 
 let p2 m =
   let rec loop x y =
-    let bl = go m x y in
-    let br = go m (x+99) y in
-    let tl = go m x (y-99) in
-    let tr = go m (x+99) (y-99) in
-    match (tl, tr, bl, br) with
-    | (1,1,1,1) -> (x*10000+(y-99))
-    | _ ->
-      if go m x (y + 1) = 1
-      then loop x (y+1)
-      else loop (x+1) y
+    if go m (x+99) (y-99) = 1 then
+      x*10000+(y-99)
+    else if go m x (y + 1) = 1 then
+      loop x (y+1)
+    else
+      loop (x+1) y
   in loop 0 100
 
 let main =
