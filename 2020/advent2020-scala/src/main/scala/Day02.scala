@@ -1,15 +1,8 @@
-import scala.io.Source
-
 object Day02 {
   // input layout: "1-3 a: abcde"
   val format = raw"(\d+)-(\d+) ([a-z]): ([a-z]+)".r
   type Entry = (Int, Int, Char, String)
 
-  def read(file: String): Iterator[Entry] =
-    for (line <- Source.fromResource(file).getLines)
-    yield
-      line match
-        case format(min, max, req, pw) => (min.toInt, max.toInt, req(0), pw)
 
   // Part 1: Password valid if req occurs min..max times in pw
   def part1(entries: List[Entry]): Int =
@@ -27,10 +20,12 @@ object Day02 {
       else false
     }).length
 
-  def run(file: String) = {
-    val input = read(file).toList
+  def run(lines: Iterator[String]) = {
+    val input = lines.map({
+      case format(min, max, req, pw) => (min.toInt, max.toInt, req(0), pw)})
+      .toList
+
     printf("part1: %d\n", part1(input))
     printf("part2: %d\n", part2(input))
   }
-      
 }

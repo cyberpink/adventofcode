@@ -1,10 +1,6 @@
-import scala.io.Source
 import scala.collection.mutable.Map
 
 object Day01 {
-  def read(file: String) =
-    Source.fromResource(file).getLines.map(_.toInt).toList
-
   // Part 1: find the two entries that sum to 2020
   //
   // a + b = target ==> b = target - a
@@ -40,12 +36,14 @@ object Day01 {
     return None
   }
 
-  def run(file: String) = {
-    part1(2020, read(file)) match {
+  def run(lines: Iterator[String]) = {
+    val input = lines.map(_.toInt).toList
+
+    part1(2020, input) match {
       case None => printf("part1: failed\n")
       case Some(r) => printf("part1: %d\n", r)
     }
-    part2(2020, read(file)) match {
+    part2(2020, input) match {
       case None => printf("part2: failed\n")
       case Some(r) => printf("part2: %d\n", r)
     }

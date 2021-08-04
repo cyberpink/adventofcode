@@ -1,13 +1,4 @@
-import scala.io.Source
-
 object Day03 {
-  // input layout: "1-3 a: abcde"
-  val format = raw"(\d+)-(\d+) ([a-z]): ([a-z]+)".r
-  type Entry = (Int, Int, Char, String)
-
-  def read(file: String): Array[String] =
-    Source.fromResource(file).getLines.toArray
-
   // Part 1: Count number of trees on slope from (0, 0) (top left) to bottom of map
   // map repeats horizontally, can use modulo on x axis for that
   def part1(slope: (Int, Int), map: Array[String]): Int = {
@@ -24,7 +15,6 @@ object Day03 {
     count
   }
 
-
   // Part 2: check the following slopes and take the product of their collisions
   //
   // Right 1, down 1.
@@ -36,8 +26,8 @@ object Day03 {
     List((1, 1), (3, 1), (5, 1), (7, 1), (1, 2))
       .map(part1(_, map)).map(BigInt(_)).reduce(_*_)
 
-  def run(file: String) = {
-    val input = read(file)
+  def run(lines: Iterator[String]) = {
+    val input = lines.toArray
     printf("part1: %d\n", part1((3, 1), input))
     printf("part2: %d\n", part2(input))
   }
