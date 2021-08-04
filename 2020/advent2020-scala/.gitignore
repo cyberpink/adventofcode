@@ -1,0 +1,8 @@
+.bloop
+.bsp
+.metals
+project/metals.sbt
+.tasty
+project/project
+project/target
+target/
