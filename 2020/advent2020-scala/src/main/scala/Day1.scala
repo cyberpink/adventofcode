@@ -5,30 +5,34 @@ object Day01 {
   def read(file: String) =
     Source.fromResource(file).getLines.map(_.toInt).toList
 
-  // a + b = target
-  // b = target - a
+  // Part 1: find the two entries that sum to 2020
+  //
+  // a + b = target ==> b = target - a
+  //
+  // iterate numbers and store b -> a mapping while looking for existing match
   def part1[A](target: Int, input: List[Int]): Option[Int] = {
     val memo: Map[Int, Int] = Map()
     for (a <- input) {
       memo.get(a) match
-        // found pairing
         case Some(b) => return Some(a * b)
-        // leave note for desired pair number
         case None => memo += (target - a -> a)
     }
     return None
   }
 
-  // a + b + c = target
-  // b + c = target - a
+  // Part 2: find three entries that sum to 2020
+  //
+  // a + b + c = target ==> b + c = target - a
+  //
+  // 1. for every a: store (total - a) -> a
+  // 2. iterate every unique combination of two entries as (b, c)
+  //    look for matching entry that is different from b & c
   def part2(target: Int, input: List[Int]): Option[Int] = {
     val memo: Map[Int, Int] = Map()
-    // store desired pairing for every number
     for(a <- input) do memo += (target - a -> a)
-    // look for match in every sum combination where all 3 numbers are unique
-    for(a <- input; b <- input if a != b) {
-      memo.get(a + b) match {
-        case Some(c) if (c != a && c != b) =>
+    for(b <- input; c <- input if b != c) {
+      memo.get(b + c) match {
+        case Some(a) if (a != b && a != c) =>
           return Some(a * b * c)
         case _ => ()
       }
