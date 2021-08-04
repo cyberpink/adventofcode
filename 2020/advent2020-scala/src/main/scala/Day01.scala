@@ -10,7 +10,7 @@ object Day01 {
   // a + b = target ==> b = target - a
   //
   // iterate numbers and store b -> a mapping while looking for existing match
-  def part1[A](target: Int, input: List[Int]): Option[Int] = {
+  def part1(target: Int, input: List[Int]): Option[Int] = {
     val memo: Map[Int, Int] = Map()
     for (a <- input) {
       memo.get(a) match
