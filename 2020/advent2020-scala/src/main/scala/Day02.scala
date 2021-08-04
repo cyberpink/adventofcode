@@ -1,5 +1,4 @@
 import scala.io.Source
-import scala.collection.mutable.Map
 
 object Day02 {
   // input layout: "1-3 a: abcde"
@@ -31,7 +30,7 @@ object Day02 {
   def run(file: String) = {
     val input = read(file).toList
     printf("part1: %d\n", part1(input))
-    printf("part1: %d\n", part2(input))
+    printf("part2: %d\n", part2(input))
   }
       
 }
