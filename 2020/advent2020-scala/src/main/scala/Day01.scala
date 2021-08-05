@@ -38,15 +38,7 @@ object Day01 {
 
   def run(lines: Iterator[String]) = {
     val input = lines.map(_.toInt).toList
-
-    part1(2020, input) match {
-      case None => printf("part1: failed\n")
-      case Some(r) => printf("part1: %d\n", r)
-    }
-    part2(2020, input) match {
-      case None => printf("part2: failed\n")
-      case Some(r) => printf("part2: %d\n", r)
-    }
+    printf("part1: %d\n", part1(2020, input).get)
+    printf("part2: %d\n", part2(2020, input).get)
   }
-      
 }
