@@ -11,5 +11,6 @@ def lines(filename: String) = Source.fromResource(filename).getLines
     case "4" => Day04.run(lines("day4.txt"))
     case "5" => Day05.run(lines("day5.txt"))
     case "6" => Day06.run(lines("day6.txt"))
+    case "7" => Day07.run(lines("day7.txt"))
     case _ => println("day not implemented")
   }
