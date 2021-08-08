@@ -1,9 +1,6 @@
 import scala.collection.mutable.Map
-import scala.annotation.tailrec
 
 object Day09 {
-
-
   // solution of day 1 to find two numbers from a list that add to a target
   def day1(target: Long, input: Array[Long]): Option[Long] = {
     val memo: Map[Long, Long] = Map()
