@@ -1,4 +1,4 @@
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
 object Day10 {
   def run(lines: Iterator[String]) = {
     // part 1:
@@ -20,7 +20,7 @@ object Day10 {
     // find distinct number of arrangements
 
     // number of combinations = sum of tail combinations
-    var memo : Map[Int, BigInt] = Map()
+    val memo : Map[Int, BigInt] = Map()
     def num_tails(i: Int): BigInt =
       memo.get(i) match {
         case Some(n) => n
@@ -30,12 +30,12 @@ object Day10 {
               .filter((j) => (data(j) - data(i)) <= 3)
               .map(num_tails)
               .sum
-          memo = memo + (i -> tails)
+          memo += (i -> tails)
           tails
         }
       }
 
-    // memo = memo + ((data.length - 1) -> 1)
+    // memo += ((data.length - 1) -> 1)
     // printf("part2: %d\n",
     //   Range(0, Math.min(3, data.length))
     //   .filter((j) => data(j) <= 3)
@@ -43,7 +43,7 @@ object Day10 {
     //     .sum)
 
     // bottom up version
-    var t_combs : Array[Long] = new Array[Long](data.length)
+    val t_combs : Array[Long] = new Array[Long](data.length)
     for (j <- (data.length - 4) until data.length)
       t_combs(j) += 1
     for (i <- (data.length - 1) to 0 by -1)
