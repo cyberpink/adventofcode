@@ -44,14 +44,17 @@ object Day10 {
 
     // bottom up version
     val t_combs : Array[Long] = new Array[Long](data.length)
-    for (j <- (data.length - 4) until data.length)
-      t_combs(j) += 1
+    t_combs(data.length - 1) = 1
     for (i <- (data.length - 1) to 0 by -1)
       for (j <- Math.max(i - 3, 0) until i)
         if(data(i) - data(j) <= 3)
           t_combs(j) += t_combs(i)
+    val starts =
+      for { i <- 0 until 3 if data(i) <= 3 }
+      yield t_combs(i)
 
-    printf("part2: %d\n", t_combs(0))
+
+    printf("part2: %d\n", starts.sum)
 
   }
 }
